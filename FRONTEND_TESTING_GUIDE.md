@@ -2,12 +2,12 @@
 
 ## ✅ **Frontend is Running!**
 
-**URL**: http://localhost:3002
+**URL**: http://localhost:3000
 
 ## 🧪 **Testing the Complete Integration**
 
 ### **1. Landing Page Testing**
-- **Visit**: http://localhost:3002
+- **Visit**: http://localhost:3000
 - **Check**: Contract Integration Test component
 - **Verify**: All contract connections are working
 - **Status**: Should show "Deployed" for all contracts
@@ -24,7 +24,7 @@
 4. **Check**: USDC balance displays correctly
 
 ### **4. Circle Creation Testing**
-- **Visit**: http://localhost:3002/create
+- **Visit**: http://localhost:3000/create
 - **Fill Form**: 
   - Contribution Amount: 100 USDC
   - Cycle Duration: 7 days
@@ -34,7 +34,7 @@
 - **Verify**: Circle appears in circles list
 
 ### **5. Circles Dashboard**
-- **Visit**: http://localhost:3002/circles
+- **Visit**: http://localhost:3000/circles
 - **Check**: Mock circles display correctly
 - **Test**: Circle cards show proper information
 - **Verify**: All UI components render properly
@@ -78,9 +78,9 @@
 - **Solution**: The RPC URL has been updated to `https://sepolia.base.org`
 
 **2. Connect Wallet Button Issues**
-- **Cause**: Hardcoded redirect to wallet.coinbase.com
-- **Fix**: Now using proper OnchainKit ConnectButton component
-- **Solution**: Button should now properly trigger wallet connection
+- **Cause**: Hardcoded redirect to wallet.coinbase.com and non-existent ConnectButton import
+- **Fix**: Now using proper OnchainKit Connected component with WalletConnect wrapper
+- **Solution**: Button should now properly trigger wallet connection without redirects
 
 **3. Wallet Not Connecting**
 - Ensure you're on Base Sepolia testnet
@@ -126,7 +126,7 @@
 The Halo Protocol frontend is now running with full contract integration:
 
 - **Smart Contracts**: Deployed to Base Sepolia ✅
-- **Frontend**: Running on http://localhost:3002 ✅
+- **Frontend**: Running on http://localhost:3000 ✅
 - **Contract Integration**: Fully connected ✅
 - **User Flows**: Ready for testing ✅
 
@@ -134,7 +134,7 @@ The Halo Protocol frontend is now running with full contract integration:
 
 ## 🔗 **Quick Links**
 
-- **Frontend**: http://localhost:3002
+- **Frontend**: http://localhost:3000
 - **BaseScan**: https://sepolia.basescan.org/
 - **Base Sepolia Faucet**: https://bridge.base.org/deposit
 - **Contract Addresses**: See DEPLOYMENT_SUMMARY.md
