@@ -143,9 +143,8 @@ export default function CirclesPage() {
             {mockCircles.map((circleId) => (
               <CircleCard
                 key={circleId.toString()}
-                circleId={circleId}
-                onJoin={handleJoinCircle}
-                onView={handleViewCircle}
+                circleId={Number(circleId)}
+                circleAddress="0x0000000000000000000000000000000000000000"
               />
             ))}
           </div>

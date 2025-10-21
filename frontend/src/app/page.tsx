@@ -4,6 +4,7 @@ import { Connected } from '@coinbase/onchainkit';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { TrustScoreDisplay } from '@/components/trust/TrustScoreDisplay';
+import { ContractIntegrationTest } from '@/components/ContractIntegrationTest';
 import { useAccount } from 'wagmi';
 import { Users, Shield, DollarSign, TrendingUp } from 'lucide-react';
 
@@ -58,6 +59,15 @@ export default function HomePage() {
           )}
         </div>
       </section>
+
+      {/* Contract Integration Test */}
+      {isConnected && (
+        <section className="py-8">
+          <div className="container mx-auto px-4">
+            <ContractIntegrationTest />
+          </div>
+        </section>
+      )}
 
       {/* Features Section */}
       <section className="py-16 bg-surface">

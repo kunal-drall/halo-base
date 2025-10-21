@@ -28,7 +28,7 @@ export function useGaslessTransaction() {
       return false;
     }
 
-    const eligible = isEligibleForGasless(trustScore, options.value);
+    const eligible = isEligibleForGasless(trustScore as bigint, options.value);
     if (!eligible) {
       setGaslessError(
         options.value 
@@ -88,7 +88,7 @@ export function useGaslessTransaction() {
       error: gaslessError,
       isGasless,
       userTrustScore: trustScore ? Number(trustScore) : 0,
-      maxValue: trustScore && trustScore >= BigInt(500) ? 1000 : 100, // $1000 or $100 USDC
+      maxValue: trustScore && (trustScore as bigint) >= BigInt(500) ? 1000 : 100, // $1000 or $100 USDC
     };
   }, [checkGaslessEligibility, gaslessError, isGasless, trustScore]);
 

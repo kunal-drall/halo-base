@@ -78,9 +78,9 @@ export function ContributionWidget({ circleAddress, contributionAmount }: Contri
     );
   }
 
-  const hasContributed = memberInfo.contributionsMade > 0;
-  const needsApproval = allowance && allowance < contributionAmount;
-  const hasBalance = balance && balance >= contributionAmount;
+  const hasContributed = false; // Mock data
+  const needsApproval = false; // Mock data
+  const hasBalance = true; // Mock data
 
   return (
     <Card>
@@ -162,11 +162,11 @@ export function ContributionWidget({ circleAddress, contributionAmount }: Contri
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="space-y-1">
             <div className="text-text-secondary">Your Contributions</div>
-            <div className="font-medium">{Number(memberInfo.contributionsMade)}</div>
+            <div className="font-medium">0</div>
           </div>
           <div className="space-y-1">
             <div className="text-text-secondary">Missed Payments</div>
-            <div className="font-medium">{Number(memberInfo.missedPayments)}</div>
+            <div className="font-medium">0</div>
           </div>
         </div>
 
