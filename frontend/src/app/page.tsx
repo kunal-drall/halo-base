@@ -1,10 +1,10 @@
 'use client';
 
-import { ConnectButton } from '@coinbase/onchainkit';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { TrustScoreDisplay } from '@/components/trust/TrustScoreDisplay';
 import { ContractIntegrationTest } from '@/components/ContractIntegrationTest';
+import { WalletConnect } from '@/components/WalletConnect';
 import { useAccount } from 'wagmi';
 import { Users, Shield, DollarSign, TrendingUp } from 'lucide-react';
 
@@ -52,7 +52,11 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="flex justify-center">
-              <ConnectButton />
+              <WalletConnect className="px-8">
+                <Button variant="primary" size="lg" className="px-8">
+                  Connect Wallet
+                </Button>
+              </WalletConnect>
             </div>
           )}
         </div>

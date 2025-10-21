@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { CircleCard } from '@/components/circles/CircleCard';
 import { useCircleFactory } from '@/hooks/useCircleFactory';
 import { useAccount } from 'wagmi';
-import { ConnectButton } from '@coinbase/onchainkit';
+import { WalletConnect } from '@/components/WalletConnect';
 import { Plus, Search, Filter } from 'lucide-react';
 
 export default function CirclesPage() {
