@@ -1,6 +1,6 @@
 'use client';
 
-import { Connected } from '@coinbase/onchainkit';
+import { ConnectButton } from '@coinbase/onchainkit';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { TrustScoreDisplay } from '@/components/trust/TrustScoreDisplay';
@@ -52,9 +52,7 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="flex justify-center">
-              <Button onClick={() => window.open('https://wallet.coinbase.com/', '_blank')}>
-              Connect Wallet
-            </Button>
+              <ConnectButton />
             </div>
           )}
         </div>
