@@ -25,6 +25,7 @@ export function useContractIntegration() {
     args: address ? [address] : undefined,
     query: {
       enabled: !!address,
+      retry: false, // Don't retry on contract errors
     },
   });
 
@@ -35,6 +36,7 @@ export function useContractIntegration() {
     functionName: 'getTotalCircles',
     query: {
       enabled: true,
+      retry: false, // Don't retry on contract errors
     },
   });
 
@@ -46,6 +48,7 @@ export function useContractIntegration() {
     args: address ? [address] : undefined,
     query: {
       enabled: !!address,
+      retry: false, // Don't retry on contract errors
     },
   });
 
@@ -57,8 +60,11 @@ export function useContractIntegration() {
     if (factoryError) errors.push(`CircleFactory: ${factoryError.message}`);
     if (usdcError) errors.push(`MockUSDC: ${usdcError.message}`);
 
+    // Handle contract connection issues gracefully
+    const hasContractErrors = trustError || factoryError || usdcError;
+    
     setIntegrationStatus({
-      contractsDeployed: !trustError && !factoryError && !usdcError,
+      contractsDeployed: !hasContractErrors,
       userRegistered: !!isRegistered,
       hasUSDC: usdcBalance ? Number(usdcBalance) > 0 : false,
       canCreateCircle: isConnected && !!isRegistered,

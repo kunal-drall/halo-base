@@ -18,7 +18,7 @@ const config = createConfig({
     }),
   ],
   transports: {
-    [baseSepolia.id]: http('https://sepolia.base.org'),
+    [baseSepolia.id]: http('https://base-sepolia-rpc.publicnode.com'),
   },
 });
 
