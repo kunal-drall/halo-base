@@ -153,3 +153,4 @@ The Halo Protocol is now live on Base Sepolia and ready for testing. All smart c
 - ✅ **Basename** support
 
 **Ready for production testing on Base Sepolia!** 🚀
+
