@@ -1,31 +1,36 @@
-import { useReadContract, useWriteContract, useAccount } from 'wagmi';
+import { useAccount, useReadContract } from 'wagmi';
+import { useMemo } from 'react';
 import { CONTRACT_ADDRESSES } from '@/config/contracts';
-import { TRUST_SCORE_MANAGER_ABI, CIRCLE_FACTORY_ABI, MOCK_USDC_ABI } from '@/config/abis';
-import { useState, useEffect } from 'react';
+import { TRUST_SCORE_MANAGER_ABI, CIRCLE_FACTORY_ABI, MOCK_USDC_ABI, YIELD_MANAGER_ABI } from '@/config/abis';
+import { useTrustScore } from './useTrustScore';
+import { useMockUSDC } from './useMockUSDC';
+import { useYieldData } from './useYieldData';
 
-/**
- * Comprehensive contract integration hook
- * Tests all contract connections and provides integration status
- */
+interface IntegrationStatus {
+  contractsDeployed: boolean;
+  userRegistered: boolean;
+  hasUSDC: boolean;
+  canCreateCircle: boolean;
+  canJoinCircle: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
 export function useContractIntegration() {
   const { address, isConnected } = useAccount();
-  const [integrationStatus, setIntegrationStatus] = useState({
-    contractsDeployed: false,
-    userRegistered: false,
-    hasUSDC: false,
-    canCreateCircle: false,
-    errors: [] as string[],
-  });
+  const { trustScore, isRegistered, isLoading: isLoadingTrust } = useTrustScore();
+  const { balance: usdcBalance, isLoading: isLoadingUSDC } = useMockUSDC();
+  const { currentAPY, isLoading: isLoadingYield } = useYieldData();
 
   // Test TrustScoreManager connection
-  const { data: isRegistered, error: trustError } = useReadContract({
+  const { data: isRegisteredTest, error: trustError } = useReadContract({
     address: CONTRACT_ADDRESSES.TRUST_SCORE_MANAGER,
     abi: TRUST_SCORE_MANAGER_ABI,
     functionName: 'isRegistered',
     args: address ? [address] : undefined,
     query: {
       enabled: !!address,
-      retry: false, // Don't retry on contract errors
+      retry: false,
     },
   });
 
@@ -36,98 +41,129 @@ export function useContractIntegration() {
     functionName: 'getTotalCircles',
     query: {
       enabled: true,
-      retry: false, // Don't retry on contract errors
+      retry: false,
     },
   });
 
   // Test MockUSDC connection
-  const { data: usdcBalance, error: usdcError } = useReadContract({
+  const { data: usdcBalanceTest, error: usdcError } = useReadContract({
     address: CONTRACT_ADDRESSES.MOCK_USDC,
     abi: MOCK_USDC_ABI,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     query: {
       enabled: !!address,
-      retry: false, // Don't retry on contract errors
+      retry: false,
     },
   });
 
-  // Update integration status
-  useEffect(() => {
+  // Test YieldManager connection
+  const { data: yieldManagerAPY, error: yieldError } = useReadContract({
+    address: CONTRACT_ADDRESSES.YIELD_MANAGER,
+    abi: YIELD_MANAGER_ABI,
+    functionName: 'getCurrentAPY',
+    query: {
+      enabled: true,
+      retry: false,
+    },
+  });
+
+  const integrationStatus = useMemo(() => {
     const errors: string[] = [];
+    const warnings: string[] = [];
     
+    // Check for contract connection errors
     if (trustError) errors.push(`TrustScoreManager: ${trustError.message}`);
     if (factoryError) errors.push(`CircleFactory: ${factoryError.message}`);
     if (usdcError) errors.push(`MockUSDC: ${usdcError.message}`);
+    if (yieldError) errors.push(`YieldManager: ${yieldError.message}`);
 
-    // Handle contract connection issues gracefully
-    const hasContractErrors = trustError || factoryError || usdcError;
+    // Check if contracts are deployed
+    const contractsDeployed = !trustError && !factoryError && !usdcError && !yieldError;
     
-    setIntegrationStatus({
-      contractsDeployed: !hasContractErrors,
-      userRegistered: !!isRegistered,
-      hasUSDC: usdcBalance ? Number(usdcBalance) > 0 : false,
-      canCreateCircle: isConnected && !!isRegistered,
+    // Check user registration
+    const userRegistered = !!isRegistered;
+    
+    // Check USDC balance
+    const hasUSDC = usdcBalance ? Number(usdcBalance) > 0 : false;
+    if (!hasUSDC && isConnected) {
+      warnings.push('No USDC balance. Consider minting test USDC.');
+    }
+    
+    // Check if user can create circles
+    const canCreateCircle = isConnected && userRegistered;
+    
+    // Check if user can join circles (needs USDC and registration)
+    const canJoinCircle = isConnected && userRegistered && hasUSDC;
+    
+    // Trust score warnings
+    if (trustScore && Number(trustScore) < 250) {
+      warnings.push('Low trust score. Consider improving your on-chain reputation.');
+    }
+
+    return {
+      contractsDeployed,
+      userRegistered,
+      hasUSDC,
+      canCreateCircle,
+      canJoinCircle,
       errors,
-    });
-  }, [trustError, factoryError, usdcError, isRegistered, usdcBalance, isConnected]);
+      warnings,
+    };
+  }, [
+    trustError,
+    factoryError,
+    usdcError,
+    yieldError,
+    isRegistered,
+    usdcBalance,
+    isConnected,
+    trustScore,
+  ]);
 
   return {
     integrationStatus,
     isRegistered,
     totalCircles,
     usdcBalance,
-    isConnected,
+    currentAPY,
+    isLoading: isLoadingTrust || isLoadingUSDC || isLoadingYield,
   };
 }
 
-/**
- * Hook to get test USDC for testing
- */
-export function useTestUSDC() {
-  const { address } = useAccount();
-  const { writeContract } = useWriteContract();
+// Hook for contract health monitoring
+export function useContractHealth() {
+  const { integrationStatus } = useContractIntegration();
+  
+  const healthScore = useMemo(() => {
+    let score = 100;
+    
+    // Deduct points for errors
+    score -= integrationStatus.errors.length * 25;
+    
+    // Deduct points for warnings
+    score -= integrationStatus.warnings.length * 10;
+    
+    // Deduct points for missing requirements
+    if (!integrationStatus.contractsDeployed) score -= 50;
+    if (!integrationStatus.userRegistered) score -= 20;
+    if (!integrationStatus.hasUSDC) score -= 15;
+    
+    return Math.max(0, score);
+  }, [integrationStatus]);
 
-  const mintTestUSDC = async (amount: bigint = BigInt(1000) * BigInt(10)**BigInt(6)) => {
-    if (!address) return;
+  const healthStatus = useMemo(() => {
+    if (healthScore >= 90) return 'excellent';
+    if (healthScore >= 70) return 'good';
+    if (healthScore >= 50) return 'fair';
+    if (healthScore >= 30) return 'poor';
+    return 'critical';
+  }, [healthScore]);
 
-    return writeContract({
-      address: CONTRACT_ADDRESSES.MOCK_USDC,
-      abi: MOCK_USDC_ABI,
-      functionName: 'mint',
-      args: [address, amount],
-    });
+  return {
+    healthScore,
+    healthStatus,
+    isHealthy: healthScore >= 70,
+    needsAttention: healthScore < 50,
   };
-
-  return { mintTestUSDC };
-}
-
-/**
- * Hook to register a new user with initial trust score
- */
-export function useUserRegistration() {
-  const { address } = useAccount();
-  const { writeContract } = useWriteContract();
-
-  const registerUser = async () => {
-    if (!address) return;
-
-    // Initial metrics for new user
-    const initialMetrics = {
-      paymentReliability: BigInt(0),
-      circleCompletions: BigInt(0),
-      defiHistory: BigInt(0),
-      socialVerification: BigInt(0),
-      lastUpdated: BigInt(Math.floor(Date.now() / 1000)),
-    };
-
-    return writeContract({
-      address: CONTRACT_ADDRESSES.TRUST_SCORE_MANAGER,
-      abi: TRUST_SCORE_MANAGER_ABI,
-      functionName: 'registerUser',
-      args: [address, initialMetrics],
-    });
-  };
-
-  return { registerUser };
 }

@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/Button';
 import { TrustScoreDisplay } from '@/components/trust/TrustScoreDisplay';
 import { ContractIntegrationTest } from '@/components/ContractIntegrationTest';
 import { WalletConnect } from '@/components/WalletConnect';
+import { UserIdentity } from '@/components/Identity';
+import { FundButton } from '@/components/Fund';
 import { useAccount } from 'wagmi';
 import { Users, Shield, DollarSign, TrendingUp } from 'lucide-react';
 
@@ -23,9 +25,11 @@ export default function HomePage() {
               </div>
               <span className="text-xl font-bold">Halo Protocol</span>
             </div>
-            <Button onClick={() => window.open('https://wallet.coinbase.com/', '_blank')}>
-              Connect Wallet
-            </Button>
+            {isConnected ? (
+              <UserIdentity />
+            ) : (
+              <WalletConnect />
+            )}
           </div>
         </div>
       </header>
@@ -152,18 +156,29 @@ export default function HomePage() {
             just trust and transparency.
           </p>
           {isConnected ? (
-            <div className="flex justify-center space-x-4">
-              <Button size="lg" className="px-8">
-                Browse Circles
-              </Button>
-              <Button variant="outline" size="lg" className="px-8">
-                Create Circle
-              </Button>
+            <div className="flex flex-col items-center space-y-4">
+              <div className="flex justify-center space-x-4">
+                <Button size="lg" className="px-8">
+                  Browse Circles
+                </Button>
+                <Button variant="outline" size="lg" className="px-8">
+                  Create Circle
+                </Button>
+              </div>
+              <div className="mt-4">
+                <FundButton 
+                  amount="10" 
+                  currency="USDC"
+                  onSuccess={(hash) => console.log('Funded successfully:', hash)}
+                  onError={(error) => console.error('Funding failed:', error)}
+                  className="px-6"
+                >
+                  Fund Wallet with USDC
+                </FundButton>
+              </div>
             </div>
           ) : (
-            <Button onClick={() => window.open('https://wallet.coinbase.com/', '_blank')}>
-              Connect Wallet
-            </Button>
+            <WalletConnect />
           )}
         </div>
       </section>
